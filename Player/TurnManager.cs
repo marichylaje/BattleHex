@@ -74,11 +74,9 @@ public class TurnManager : MonoBehaviour
             int enemyWalk = 2;
             TerrainObjects[] pathToPlayer = Helper.GetShorterPathToPlayer("Enemy", enemyWalk, Constants.terrainObjects);
             Debug.Log("HERE 0------------------------------------------------------------------>: " + Constants.terrainObjects[0].id);
-            Debug.Log("HERE 1------------------------------------------------------------------>: " + Constants.terrainObjects[1].id);
-            //;
-            //Debug.Log("HERE 3------------------------------------------------------------------>: " + pathToPlayer[3].id);
-            // createHighlights.HighlightList(pathToPlayer);
-            //Helper.MovePlayerToPosition(pathToPlayer[enemyWalk-1].xPos, pathToPlayer[enemyWalk-1].yPos, "Enemy");
+            Debug.Log("HERE 3------------------------------------------------------------------>: " + pathToPlayer[3].id);
+            createHighlights.HighlightList(pathToPlayer);
+            Helper.MovePlayerToPosition(pathToPlayer[enemyWalk-1].xPos, pathToPlayer[enemyWalk-1].yPos, "Enemy");
         }
     }
 }
