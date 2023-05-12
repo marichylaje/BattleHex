@@ -7,7 +7,7 @@ public static class Constants
 {
     public static float playerDesface = 3f;
     public static float enemyDesface = -2f;
-    public static int initialTerrainID = 90;
+    public static int initialTerrainID = 10;
     public static int initialEnemyTerrainID = 173;
     public static float hexWidth = 1;
     public static float hexHeight = 1;

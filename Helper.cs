@@ -315,25 +315,24 @@ public static class Helper
                 float xDistanceB = xDistanceBetween(b);
                 float yDistanceA = yDistanceBetween(a);
                 float yDistanceB = yDistanceBetween(b);
-                Debug.Log("xDistanceA :" + xDistanceA);
-                Debug.Log("xDistanceB :" + xDistanceB);
-                Debug.Log("yDistanceA :" + yDistanceA);
-                Debug.Log("yDistanceB :" + yDistanceB);
 
                 float distanceA = Mathf.Abs(xDistanceA) + Mathf.Abs(yDistanceA) + a.terrainType.movilityCost - a.terrainType.bonusCost;
                 float distanceB = Mathf.Abs(xDistanceB) + Mathf.Abs(yDistanceB) + b.terrainType.movilityCost - a.terrainType.bonusCost;
-                Debug.Log("distanceA :" + distanceA);
-                Debug.Log("distanceB :" + distanceB);
-                Debug.Log("////////////////////////////////////////////////////////");
 
                 return distanceA.CompareTo(distanceB);
             });
+            Debug.Log("////////////////////////////////////////////////////////");
+
+            Debug.Log("loopCounter :" + loopCounter);
+            foreach(TerrainObjects surrTerrain in surrTerrains){
+                Debug.Log("xDistanceBetween :" + xDistanceBetween(surrTerrain) + ", yDistanceBetween :" + yDistanceBetween(surrTerrain) + ", ID :" + surrTerrain.id);
+            }
 
             foreach(TerrainObjects surrTerrain in surrTerrains){
                 if(createPathFlag){
                     break;
                 }
-                
+
                 // si encuentra un terreno que tenga diferencia 0 con X e Y, hemos llegado a Player
                 if(xDistanceBetween(surrTerrain) == 0){
                     if(yDistanceBetween(surrTerrain) == 0){
@@ -341,8 +340,9 @@ public static class Helper
                         break;
                     }
                 }
+                Debug.Log("surrTerrain ID :" + surrTerrain.id);
 
-                if(loopCounter <= acumTerrains.Length){
+                if(loopCounter < acumTerrains.Length){
                     acumTerrains[loopCounter] = surrTerrain;
                 }
                 CreatePath(Helper.GetSurroundingTerrainsByCoords(surrTerrain, 1, terrainObjects));
