@@ -183,7 +183,12 @@ public static class Helper
         coords.Add(new Vector2(x - (d * xMove), Mathf.Round((coords[1].y + ((d * yMove) / 2) + (id % 2 == 0 ? ((d % 2 == 0) ? 0 : yOffset) : ((d % 2 == 0) ? 0 : -yOffset))) * 100f) / 100f)); // botL
         coords.Add(new Vector2(x + (d * xMove), Mathf.Round((coords[0].y - ((d * yMove) / 2) + (id % 2 == 0 ? ((d % 2 == 0) ? 0 : yOffset) : ((d % 2 == 0) ? 0 : -yOffset))) * 100f) / 100f)); // topR
         coords.Add(new Vector2(x + (d * xMove), Mathf.Round((coords[1].y + ((d * yMove) / 2) + (id % 2 == 0 ? ((d % 2 == 0) ? 0 : yOffset) : ((d % 2 == 0) ? 0 : -yOffset))) * 100f) / 100f)); // botR
-
+        /*Debug.Log("coords top X:" + coords[0].x + ", Y: " + coords[0].y);
+        Debug.Log("coords bot :" + coords[1].x + ", Y: " + coords[1].y);
+        Debug.Log("coords topL :" + coords[2].x + ", Y: " + coords[2].y);
+        Debug.Log("coords botL :" + coords[3].x + ", Y: " + coords[3].y);
+        Debug.Log("coords topR :" + coords[4].x + ", Y: " + coords[4].y);
+        Debug.Log("coords botR :" + coords[5].x + ", Y: " + coords[5].y);*/
         if(d > 1){
             for(int i = 1; i < d; i++){
                 coords.Add(new Vector2((coords[0].x - (xMove * i)), Mathf.Round(((coords[0].y - ((yMove / 2) * i)) + (id % 2 == 0 ? ((i % 2 != 0) ? yOffset : 0) : ((i % 2 != 0) ? -yOffset : 0))) * 100f) / 100f)); // topL
@@ -257,6 +262,9 @@ public static class Helper
         return minDistanceTillEnemy;
     }
 
+//TODO: despues ejecutar al reves, y hacer el camino mas corto
+//      priorizar cuando se avanza en diagonal que cuando se avanza en linea recta, cuando en diagonal ambos disminuyen
+//      eliminar la impresion de highlights para enemigo
     public static TerrainObjects[] GetShorterPathToPlayer(string enemyTag, int attackDistance, List<TerrainObjects> terrainObjects){
         /*
             1- obtener datos del jugador y enemigo a mover
@@ -276,8 +284,6 @@ public static class Helper
         TerrainObjects enemyTerrain = Helper.GetActualPlayerBlockFromTag(enemyTag, true, terrainObjects);
         float enemyTXPos = enemyTerrain.xPos;
         float enemyTYPos = enemyTerrain.yPos;
-
-
 
         // 3- comparar a cuantos hexagonos se encuentra en eje X e Y
         float xDistanceBetween(TerrainObjects terrainObj){
@@ -309,9 +315,16 @@ public static class Helper
                 float xDistanceB = xDistanceBetween(b);
                 float yDistanceA = yDistanceBetween(a);
                 float yDistanceB = yDistanceBetween(b);
+                Debug.Log("xDistanceA :" + xDistanceA);
+                Debug.Log("xDistanceB :" + xDistanceB);
+                Debug.Log("yDistanceA :" + yDistanceA);
+                Debug.Log("yDistanceB :" + yDistanceB);
 
                 float distanceA = Mathf.Abs(xDistanceA) + Mathf.Abs(yDistanceA) + a.terrainType.movilityCost - a.terrainType.bonusCost;
                 float distanceB = Mathf.Abs(xDistanceB) + Mathf.Abs(yDistanceB) + b.terrainType.movilityCost - a.terrainType.bonusCost;
+                Debug.Log("distanceA :" + distanceA);
+                Debug.Log("distanceB :" + distanceB);
+                Debug.Log("////////////////////////////////////////////////////////");
 
                 return distanceA.CompareTo(distanceB);
             });
@@ -320,6 +333,7 @@ public static class Helper
                 if(createPathFlag){
                     break;
                 }
+                
                 // si encuentra un terreno que tenga diferencia 0 con X e Y, hemos llegado a Player
                 if(xDistanceBetween(surrTerrain) == 0){
                     if(yDistanceBetween(surrTerrain) == 0){
@@ -328,7 +342,7 @@ public static class Helper
                     }
                 }
 
-                if(loopCounter > acumTerrains.Length){
+                if(loopCounter <= acumTerrains.Length){
                     acumTerrains[loopCounter] = surrTerrain;
                 }
                 CreatePath(Helper.GetSurroundingTerrainsByCoords(surrTerrain, 1, terrainObjects));

@@ -43,6 +43,7 @@ public class TurnManager : MonoBehaviour
             //step0: update turn flag
             player1Turn = false;
             Debug.Log("--------Dentro del IF player1Turn true--------");
+            moveLogic.DestroyHighlighPlayableTerrain(500, -1);
 
             //step1: change UI
             GameObject.FindWithTag("myTurnIcon").GetComponent<Image>().enabled = true;
@@ -73,9 +74,8 @@ public class TurnManager : MonoBehaviour
             //step3: enemy IA action
             int enemyWalk = 2;
             TerrainObjects[] pathToPlayer = Helper.GetShorterPathToPlayer("Enemy", enemyWalk, Constants.terrainObjects);
-            Debug.Log("HERE 0------------------------------------------------------------------>: " + Constants.terrainObjects[0].id);
-            Debug.Log("HERE 3------------------------------------------------------------------>: " + pathToPlayer[3].id);
             createHighlights.HighlightList(pathToPlayer);
+            Debug.Log("MOVE ENEMY");
             Helper.MovePlayerToPosition(pathToPlayer[enemyWalk-1].xPos, pathToPlayer[enemyWalk-1].yPos, "Enemy");
         }
     }
