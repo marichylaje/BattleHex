@@ -332,6 +332,21 @@ public static class Helper
                 if(createPathFlag){
                     break;
                 }
+                bool alreadyExists = false;
+                for (int i = 0; i < loopCounter; i++)
+                {
+                    if (acumTerrains[i] == surrTerrain)
+                    {
+                        alreadyExists = true;
+                        break;
+                    }
+                }
+                // Si el surrTerrain ya existe en acumTerrains, continuar con la siguiente iteración
+                if (alreadyExists)
+                {
+                    continue;
+                }
+
 
                 // si encuentra un terreno que tenga diferencia 0 con X e Y, hemos llegado a Player
                 if(xDistanceBetween(surrTerrain) == 0){
@@ -344,6 +359,9 @@ public static class Helper
 
                 if(loopCounter < acumTerrains.Length){
                     acumTerrains[loopCounter] = surrTerrain;
+                } else {
+                    Debug.Log("BREAK FORCED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    break;
                 }
                 CreatePath(Helper.GetSurroundingTerrainsByCoords(surrTerrain, 1, terrainObjects));
             }
