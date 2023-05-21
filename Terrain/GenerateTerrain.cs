@@ -18,10 +18,28 @@ public class GenerateTerrain : MonoBehaviour
 {
 
     public TerrainType[] terrainTypes;
-    private GridData[] gridPositions;
+
+    public static float spriteTYSizePenalization = 0.1f;    private GridData[] gridPositions;
     private List<TerrainObjects> terrainObjects = new List<TerrainObjects>();
     private bool flag = true;
     public GameObject terrainsFolder;
+
+    public float gapX = 0f;
+    public float gapY = 0f;
+    public int terrainWidth = 20;
+    public int terrainHeight = 9;
+    public float spriteTXSize = 15f;
+    public float spriteTYSize = 15f;
+    private void Start() {
+        Constants.gapX = gapX;
+        Constants.gapY = gapY;
+        Constants.terrainWidth = terrainWidth;
+        Constants.terrainHeight = terrainHeight;
+        Constants.spriteTXSize = spriteTXSize;
+        Constants.spriteTYSize = spriteTYSize;
+        
+    }
+
     private void Update() {
         if(flag && terrainTypes != null && terrainTypes.Length > 0){
             Initialize();

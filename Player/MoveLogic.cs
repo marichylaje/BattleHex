@@ -8,6 +8,7 @@ public class MoveLogic : MonoBehaviour
     public CreateHighlights createHighlights;
     public PlayerStats playerStats;
     public TurnManager turnManager;
+    public float movSpeed;
     public bool generateHighlightTerrain = false;
     bool flagInit = false;
 
@@ -20,6 +21,7 @@ public class MoveLogic : MonoBehaviour
     void Start()
     {
         //yield return new WaitForSeconds(0.1f);
+        Constants.movSpeed = movSpeed;
 
         // Obtenemos la lista de objetos del terreno
         movementDistance = playerStats.movement;
@@ -48,7 +50,7 @@ public class MoveLogic : MonoBehaviour
         }
         if(!player1Turn && !generateHighlightTerrain){
             int maxAttDistanceOnSkillsets = 1; // editar luego por cada enemigo
-            Helper.GetMinDistanceTillEnemy("Enemy", maxAttDistanceOnSkillsets, terrainObjects);
+            // Helper.GetMinDistanceTillEnemy("Enemy", maxAttDistanceOnSkillsets, terrainObjects);
             generateHighlightTerrain = true; // <--- eliminar esto?
         }
         if(!player1Turn){
@@ -57,10 +59,31 @@ public class MoveLogic : MonoBehaviour
     }
 
     void InitPositions(){
+        float initMovSpeed = 0.1f;
         TerrainObjects initTerrain = terrainObjects[Constants.initialTerrainID];
         TerrainObjects initEnemyTerrain = terrainObjects[Constants.initialEnemyTerrainID];
-        Helper.MovePlayerToPosition(initTerrain.xPos, initTerrain.yPos, "Player");
-        Helper.MovePlayerToPosition(initEnemyTerrain.xPos, initEnemyTerrain.yPos, "Enemy");
+        StartCoroutine(Helper.MovePlayerToPosition(initTerrain.xPos, initTerrain.yPos, "Player", initMovSpeed));
+        StartCoroutine(Helper.MovePlayerToPosition(initEnemyTerrain.xPos, initEnemyTerrain.yPos, "Enemy", initMovSpeed));
+    }
+
+    public void HideHighlighPlayableTerrain(int idMax, int idMin)
+    {
+        GameObject[] highlightTerrain = GameObject.FindGameObjectsWithTag("HighlightTerrain");
+        foreach (GameObject terrainObject in highlightTerrain)
+        {
+            if (int.TryParse(terrainObject.name, out int terrainId))
+            {
+                terrainId = int.Parse(terrainObject.name);
+                if ((terrainId >= idMax && terrainId <= idMax + 499) || terrainId <= idMin)
+                {
+                    Renderer renderer = terrainObject.GetComponent<Renderer>();
+                    if (renderer != null)
+                    {
+                        renderer.enabled = false;  // Desactiva el componente Renderer para ocultar el objeto
+                    }
+                }
+            }
+        }
     }
 
     public void DestroyHighlighPlayableTerrain(int idMax, int idMin)

@@ -5,18 +5,20 @@ using UnityEngine;
 //MAX TERRAIN ID: 179
 public static class Constants
 {
+    public static float movSpeed = .5f;
     public static float playerDesface = 3f;
     public static float enemyDesface = -2f;
     public static int initialTerrainID = 10;
     public static int initialEnemyTerrainID = 173;
     public static float hexWidth = 1;
     public static float hexHeight = 1;
-    public static float gap = 1.3f;
-    public static int terrainWidth = 20;
-    public static int terrainHeight = 9;
-    public static float spriteTXSize = 16.3f;
-    public static int spriteTYSize = 16;
-    public static float spriteTYSizePenalization = 0.1f;
+    public static float gapX;
+    public static float gapY;
+    public static int terrainWidth;
+    public static int terrainHeight;
+    public static float spriteTXSize;
+    public static float spriteTYSize;
+    public static float spriteTYSizePenalization;
 
     public static TerrainType[] terrainTypes;
 

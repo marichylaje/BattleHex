@@ -2,18 +2,24 @@ using UnityEngine;
 
 public class CameraFollow : MonoBehaviour
 {
-    public Transform target;   // Objeto a seguir
+    public TurnManager turnManager;   // mov de camara
     public float smoothSpeed = 0.125f;  // Velocidad de movimiento de la cámara
     public float dragSpeed = 2f;  // Velocidad de arrastre de la cámara
-    public float delayTime = 1f;  // Tiempo de retraso antes de volver a centrar la cámara en el objeto de seguimiento
+    public float delayTime = 3f;  // Tiempo de retraso antes de volver a centrar la cámara en el objeto de seguimiento
 
     private Vector3 dragOrigin;  // Origen del arrastre
+    private Transform target;  // Indicador de si se está arrastrando la cámara
     private Vector3 targetPosition;  // Posición objetivo de la cámara
     private bool isDragging;  // Indicador de si se está arrastrando la cámara
 
     private void Start()
     {
-        targetPosition = target.position;
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            target = player.transform;
+            targetPosition = target.position;
+        }
     }
 
     private void LateUpdate()

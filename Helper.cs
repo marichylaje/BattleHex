@@ -15,8 +15,8 @@ public static class Helper
     public static GridData[] GenerateGridPositions(int terrainHeight)
     {
         GridData[] gridPositions;
-        float offsetX = Constants.hexWidth * 15 + Constants.gap;
-        float offsetY = Constants.hexHeight * 16;
+        float offsetX = Constants.hexWidth * Constants.spriteTXSize + Constants.gapX;
+        float offsetY = Constants.hexHeight * Constants.spriteTYSize + Constants.gapY;
         int id = 0;
         int terrainWidth = Constants.terrainWidth;
 
@@ -28,7 +28,7 @@ public static class Helper
             {
                 GridData position;
                 if (x % 2 != 0)
-                    position = new GridData(x * offsetX, y * offsetY + 8.1f, id);
+                    position = new GridData(x * offsetX, y * offsetY + (offsetY / 2), id);
                 else
                     position = new GridData(x * offsetX, y * offsetY, id);
 
@@ -97,13 +97,51 @@ public static class Helper
         return null;
     }
 
-    public static void MovePlayerToPosition(float xPos, float yPos, string tag)
+    
+    public static IEnumerator MovePlayerToPosition(float xPos, float yPos, string tag, float movementDuration)
     {
-        GameObject[] players = GameObject.FindGameObjectsWithTag(tag);
-        if (players.Length > 0)
+        GameObject player = GameObject.FindGameObjectWithTag(tag);
+        Vector3 startPosition = player.transform.position;
+        Vector3 targetPosition = new Vector3(xPos, yPos + Helper.GetPlayerDesface(tag), 0);
+
+        float elapsedTime = 0f;
+
+        while (elapsedTime < movementDuration)
         {
-            Vector3 newPosition = new Vector3(xPos, yPos + (tag != "Player" ? Constants.enemyDesface : Constants.playerDesface), 0);
-            players[0].transform.position = newPosition;
+            // Calcula el progreso del movimiento
+            float t = elapsedTime / movementDuration;
+
+            // Aplica una curva de interpolación suave para el movimiento
+            t = Mathf.SmoothStep(0f, 1f, t);
+
+            // Calcula la posición actual del jugador mediante la interpolación suave
+            Vector3 currentPosition = Vector3.Lerp(startPosition, targetPosition, t);
+
+            // Actualiza la posición del jugador
+            player.transform.position = currentPosition;
+
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        // Asegúrate de que el jugador esté exactamente en la posición objetivo
+        player.transform.position = targetPosition;
+    }
+
+
+    private static float GetPlayerDesface(string tag)
+    {
+        if (tag == "Player")
+        {
+            return Constants.playerDesface;
+        }
+        else if (tag == "Enemy")
+        {
+            return Constants.enemyDesface;
+        }
+        else
+        {
+            return 0f; // Ajusta esto según tus necesidades
         }
     }
 
@@ -321,12 +359,12 @@ public static class Helper
 
                 return distanceA.CompareTo(distanceB);
             });
-            Debug.Log("////////////////////////////////////////////////////////");
+            /*Debug.Log("////////////////////////////////////////////////////////");
 
             Debug.Log("loopCounter :" + loopCounter);
             foreach(TerrainObjects surrTerrain in surrTerrains){
                 Debug.Log("xDistanceBetween :" + xDistanceBetween(surrTerrain) + ", yDistanceBetween :" + yDistanceBetween(surrTerrain) + ", ID :" + surrTerrain.id);
-            }
+            }*/
 
             foreach(TerrainObjects surrTerrain in surrTerrains){
                 if(createPathFlag){
@@ -355,9 +393,8 @@ public static class Helper
                         break;
                     }
                 }
-                Debug.Log("surrTerrain ID :" + surrTerrain.id);
 
-                if(loopCounter < acumTerrains.Length){
+                if((loopCounter < acumTerrains.Length) && surrTerrain != null){
                     acumTerrains[loopCounter] = surrTerrain;
                 } else {
                     Debug.Log("BREAK FORCED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");

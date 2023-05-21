@@ -39,11 +39,12 @@ public class TurnManager : MonoBehaviour
     {
         if (player1Turn && Constants.terrainObjects.Count > 0)
         {
+            moveLogic.DestroyHighlighPlayableTerrain(500, -1);
             // Es el turno del jugador 1
             //step0: update turn flag
             player1Turn = false;
             Debug.Log("--------Dentro del IF player1Turn true--------");
-            moveLogic.DestroyHighlighPlayableTerrain(500, -1);
+            //moveLogic.DestroyHighlighPlayableTerrain(500, -1);
 
             //step1: change UI
             GameObject.FindWithTag("myTurnIcon").GetComponent<Image>().enabled = true;
@@ -69,14 +70,20 @@ public class TurnManager : MonoBehaviour
 
             //step2: destroy HighlightTerrain and update flag
             moveLogic.generateHighlightTerrain = false;
-            moveLogic.DestroyHighlighPlayableTerrain(500, -1);
 
             //step3: enemy IA action
+            // TODO: cambiar esto por el mov de cada enemigo
             int enemyWalk = 2;
             TerrainObjects[] pathToPlayer = Helper.GetShorterPathToPlayer("Enemy", enemyWalk, Constants.terrainObjects);
-            createHighlights.HighlightList(pathToPlayer);
-            Debug.Log("MOVE ENEMY");
-            Helper.MovePlayerToPosition(pathToPlayer[enemyWalk-1].xPos, pathToPlayer[enemyWalk-1].yPos, "Enemy");
+            pathToPlayer = pathToPlayer.Where(path => path != null).ToArray();
+            for(int i = 0; i < pathToPlayer.Length; i++){
+                Debug.Log("HERE ID: " + pathToPlayer[i].id);
+            }
+
+            //createHighlights.HighlightList(pathToPlayer);
+            StartCoroutine(Helper.MovePlayerToPosition(pathToPlayer[enemyWalk-1].xPos, pathToPlayer[enemyWalk-1].yPos, "Enemy", 1.0f));
+            moveLogic.HideHighlighPlayableTerrain(500, -1);
+
         }
     }
 }
