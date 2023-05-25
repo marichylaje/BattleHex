@@ -5,7 +5,6 @@ using UnityEngine;
 
 public class MoveLogic : MonoBehaviour
 {
-    public CreateHighlights createHighlights;
     public PlayerStats playerStats;
     public TurnManager turnManager;
     public float movSpeed;
@@ -20,41 +19,39 @@ public class MoveLogic : MonoBehaviour
 
     void Start()
     {
-        //yield return new WaitForSeconds(0.1f);
         Constants.movSpeed = movSpeed;
 
         // Obtenemos la lista de objetos del terreno
         movementDistance = playerStats.movement;
-        //yield return new WaitForSeconds(0.1f);
 
-        // Obtenemos el objeto de terreno inicial y movemos el jugador a su posición
-        
+        // sabemos en que turno se encuentra
         player1Turn = turnManager.player1Turn;
-        Debug.Log("Llamado Endturn desde el inicio de MoveLogic");
-        turnManager.EndTurn();
 
-        // para que se ejecute luego de ser transportado a su posicion inicial
+        // para que se ejecute el Highlight luego de ser transportado a su posicion inicial
         generateHighlightTerrain = true;
     }
 
     void Update()
     {
-        player1Turn = turnManager.player1Turn;
-
+        // da la posicion inicial a todos
         if(!flagInit && terrainObjects.Count > 0 && terrainObjects[0] != null){
             InitPositions();
             flagInit = true;
         }
-        if(!generateHighlightTerrain && player1Turn && terrainObjects.Count > 0 && terrainObjects[0] != null){
-            generateHighlightTerrain = false;
-        }
-        if(!player1Turn && !generateHighlightTerrain){
+
+        /*if(!player1Turn && !generateHighlightTerrain){
             int maxAttDistanceOnSkillsets = 1; // editar luego por cada enemigo
             // Helper.GetMinDistanceTillEnemy("Enemy", maxAttDistanceOnSkillsets, terrainObjects);
             generateHighlightTerrain = true; // <--- eliminar esto?
-        }
+        }*/
+
+        // si no es nuestro turno, elimina los Highlights generados
         if(!player1Turn){
             generateHighlightTerrain = true;
+        }
+
+        if(!generateHighlightTerrain){
+            DestroyHighlighPlayableTerrain(500, -1);
         }
     }
 

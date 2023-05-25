@@ -153,28 +153,28 @@ public static class Helper
 
     // funcion generalmente usada para detectar en que casilla se encuentra el jugador o enemigos, si le pasamos su tag
     public static TerrainObjects GetActualPlayerBlockFromTag(string tagName, bool isEnemy, List<TerrainObjects> terrainObjects)
-{
-    GameObject actualBlock = GameObject.FindGameObjectWithTag(tagName);
-    if (actualBlock == null)
     {
-        Debug.LogError("Could not find game object with tag: " + tagName);
+        GameObject actualBlock = GameObject.FindGameObjectWithTag(tagName);
+        if (actualBlock == null)
+        {
+            Debug.LogError("Could not find game object with tag: " + tagName);
+            return null;
+        }
+
+        float yDesface = isEnemy ? Constants.enemyDesface : Constants.playerDesface;
+        Vector2 actualPosition = new Vector2(actualBlock.transform.position.x, actualBlock.transform.position.y - yDesface);
+
+        foreach (TerrainObjects terrainObject in terrainObjects)
+        {
+            if (Mathf.Approximately(terrainObject.xPos, actualPosition.x) && Mathf.Approximately(terrainObject.yPos, actualPosition.y))
+            {
+                return terrainObject;
+            }
+        }
+
+        Debug.LogError("Could not find terrain object at position: " + actualPosition + "from tag: " + tagName);
         return null;
     }
-
-    float yDesface = isEnemy ? Constants.enemyDesface : Constants.playerDesface;
-    Vector2 actualPosition = new Vector2(actualBlock.transform.position.x, actualBlock.transform.position.y - yDesface);
-
-    foreach (TerrainObjects terrainObject in terrainObjects)
-    {
-        if (Mathf.Approximately(terrainObject.xPos, actualPosition.x) && Mathf.Approximately(terrainObject.yPos, actualPosition.y))
-        {
-            return terrainObject;
-        }
-    }
-
-    Debug.LogError("Could not find terrain object at position: " + actualPosition + "from tag: " + tagName);
-    return null;
-}
 
 
     public static TerrainObjects GetTerrainDataFromCoords(float xPos, float yPos, bool onlyHighlighted, List<TerrainObjects> terrainObjects)
@@ -186,7 +186,6 @@ public static class Helper
             {
                 if (terrainObject.xPos == xPos && terrainObject.yPos == yPos)
                 {
-                    //turnMannager.EndTurn(); ?? -> estaba asi de antes, como lo activamos de nuevo?
                     return terrainObject;
                 }
             }
@@ -202,7 +201,43 @@ public static class Helper
         return null; 
     }
 
-    public static List<TerrainObjects> GetSurroundingTerrainsByCoords(TerrainObjects terrainUnder, float d, List<TerrainObjects> terrainObjects) {        
+    public static TerrainObjects[] GetStraightLine(int distance, int direction, TerrainObjects terrainUnder, List<TerrainObjects> terrainObjects)
+    {
+        Vector2[] coords = new Vector2[distance];
+        List<TerrainObjects> response = new List<TerrainObjects>(); // Crear un arreglo de tamaño 1
+        
+        bool IsWithinMapBounds(Vector2 position){
+            return position.x >= 0 && position.x < Constants.maxXsizeMap && position.y >= 0 && position.y < Constants.maxYsizeMap;
+        }
+
+        for(int i = 1; i <= distance; i++){
+            Vector2[] data = Helper.GetSurroundingCoords(i, terrainUnder, terrainObjects).ToArray();
+
+            if(direction == 1 /*topR*/ && IsWithinMapBounds(data[4])){
+                coords[i - 1] = data[4];
+            } else if(direction == 2 /*top*/ && IsWithinMapBounds(data[0])){
+                coords[i - 1] = data[0];
+            } else if(direction == 3 /*topL*/ && IsWithinMapBounds(data[2])){
+                coords[i - 1] = data[2];
+            } else if(direction == 4 /*botL*/ && IsWithinMapBounds(data[3])){
+                coords[i - 1] = data[3];
+            } else if(direction == 5 /*bot*/ && IsWithinMapBounds(data[1])){
+                coords[i - 1] = data[1];
+            } else if(direction == 6 /*botR*/ && IsWithinMapBounds(data[5])){
+                coords[i - 1] = data[5];            
+            }
+        }
+
+        for (int i = 0; i < coords.Length; i++) {
+            TerrainObjects terrainObject = Helper.GetTerrainDataFromCoords(coords[i].x, coords[i].y, false, terrainObjects);
+            if (terrainObject != null && !response.Contains(terrainObject)) {
+                response.Add(terrainObject);
+            }
+        }
+        return response.ToArray();
+    }
+
+    public static List<Vector2> GetSurroundingCoords(int d, TerrainObjects terrainUnder, List<TerrainObjects> terrainObjects) {        
         float yMove = Constants.spriteTYSize;
         float xMove = Constants.spriteTXSize;
         float yOffset = Constants.spriteTYSizePenalization;
@@ -240,19 +275,31 @@ public static class Helper
             }
         }
 
+        return coords;
+    }
+
+    public static List<TerrainObjects> GetSurroundingTerrainsByCoords(int d, TerrainObjects terrainUnder, List<TerrainObjects> terrainObjects) {        
+        List<Vector2> coords = Helper.GetSurroundingCoords(d, terrainUnder, terrainObjects);
+        List<TerrainObjects> terrains = new List<TerrainObjects>();
+
         for (int i = 0; i < coords.Count; i++) {
-            if(coords[i].x > 310 || coords[i].y > 137 || coords[i].x < 0 || coords[i].y < 0){
-                
-            } else {
-                TerrainObjects terrainObject = Helper.GetTerrainDataFromCoords(coords[i].x, coords[i].y, false, terrainObjects);
-                if (terrainObject != null && !terrains.Contains(terrainObject)) { // Verifica que se haya encontrado un objeto en la posición y que no se haya agregado antes a la lista de terrenos
-                    terrains.Add(terrainObject);
-                }
+            TerrainObjects terrainObject = Helper.GetTerrainDataFromCoords(coords[i].x, coords[i].y, false, terrainObjects);
+            if (terrainObject != null && !terrains.Contains(terrainObject)) {
+                terrains.Add(terrainObject);
             }
-            
         }
         return terrains;
     }
+
+    /*
+        DIRECTIONS:
+        - top right: 1
+        - top: 2
+        - top left: 3
+        - bot left: 4
+        - bot: 5
+        - bot right: 6
+    */
 
     /*public static List<TerrainObjects> GetSurroundingTerrainsByTag(string tagName, bool enemy, List<TerrainObjects> terrainObjects){
         List<TerrainObjects> surroundingTerrains = new List<TerrainObjects>();
@@ -282,7 +329,7 @@ public static class Helper
 
         int minDistanceTillEnemy = -1;
         for(int i = 1; i < 100; i++){
-            List<TerrainObjects> terrainsRatiusTillEnemy = Helper.GetSurroundingTerrainsByCoords(playerTerrain, i, terrainObjects);
+            List<TerrainObjects> terrainsRatiusTillEnemy = Helper.GetSurroundingTerrainsByCoords(i, playerTerrain, terrainObjects);
             foreach(TerrainObjects terrain in terrainsRatiusTillEnemy){
 
                 if(terrain.xPos == enemyTXPos && terrain.yPos == enemyTYPos){
@@ -400,11 +447,11 @@ public static class Helper
                     Debug.Log("BREAK FORCED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                     break;
                 }
-                CreatePath(Helper.GetSurroundingTerrainsByCoords(surrTerrain, 1, terrainObjects));
+                CreatePath(Helper.GetSurroundingTerrainsByCoords(1, surrTerrain, terrainObjects));
             }
         }
         //empieza llamandolo desde la posicion inicial del enemigo
-        CreatePath(Helper.GetSurroundingTerrainsByCoords(enemyTerrain, 1, terrainObjects));
+        CreatePath(Helper.GetSurroundingTerrainsByCoords(1, enemyTerrain, terrainObjects));
 
         return acumTerrains;
     }

@@ -6,7 +6,20 @@ using UnityEngine;
 public class CreateHighlights : MonoBehaviour
 {
     public GenerateTerrain generateTerrain;
-    public void StarHighlightAttack(int attackDistance, int startDistance, List<TerrainObjects> terrainObjects)
+
+    public void WalkHighlight(int walkDistance, List<TerrainObjects> terrainObjects)
+    {
+        TerrainObjects actualTerrainUnderPlayer = Helper.GetActualPlayerBlockFromTag("Player", false, terrainObjects);
+        List<TerrainObjects> terrainToHighlight = new List<TerrainObjects>();
+        
+        for(int i = 1; i <= walkDistance; i++){
+            terrainToHighlight = Helper.GetSurroundingTerrainsByCoords(i, actualTerrainUnderPlayer, terrainObjects);
+            
+            generateTerrain.HighlighPlayableTerrain(terrainToHighlight.ToArray());
+        }
+    }
+
+    /*public void StarHighlightAttack(int attackDistance, int startDistance, List<TerrainObjects> terrainObjects)
     {
         int actualTerrainIDUnderPlayer = Helper.GetActualPlayerBlockFromTag("Player", false, terrainObjects).id;
 
@@ -27,17 +40,7 @@ public class CreateHighlights : MonoBehaviour
         generateTerrain.HighlighPlayableTerrain(toGenerate);
     }
 
-    public void WalkHighlight(int walkDistance, List<TerrainObjects> terrainObjects)
-    {
-        TerrainObjects actualTerrainUnderPlayer = Helper.GetActualPlayerBlockFromTag("Player", false, terrainObjects);
-        List<TerrainObjects> terrainToHighlight = new List<TerrainObjects>();
-        
-        for(int i = 1; i <= walkDistance; i++){
-            terrainToHighlight = Helper.GetSurroundingTerrainsByCoords(actualTerrainUnderPlayer, i, terrainObjects);
-        
-            generateTerrain.HighlighPlayableTerrain(terrainToHighlight.ToArray());
-        }
-    }
+    
 
     public void HighlightList(TerrainObjects[] terrainObjects)
     {
@@ -62,5 +65,5 @@ public class CreateHighlights : MonoBehaviour
 
         generateTerrain.HighlighPlayableTerrain(toHighlightTerrainTop);
     }
-    
+    */
 }

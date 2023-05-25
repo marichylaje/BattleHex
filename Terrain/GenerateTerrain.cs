@@ -22,7 +22,7 @@ public class GenerateTerrain : MonoBehaviour
     public static float spriteTYSizePenalization = 0.1f;    private GridData[] gridPositions;
     private List<TerrainObjects> terrainObjects = new List<TerrainObjects>();
     private bool flag = true;
-    public GameObject terrainsFolder;
+    //public GameObject terrainsFolder;
 
     public float gapX = 0f;
     public float gapY = 0f;
@@ -77,7 +77,7 @@ public class GenerateTerrain : MonoBehaviour
             if (terrainType.name == name)
             {
                 GameObject newTerrainObject = GameObject.Instantiate(isHighlighted ? terrainType.highlighted : terrainType.type, new Vector3(position.x, position.y, 0), Quaternion.identity);
-                newTerrainObject.transform.SetParent(terrainsFolder.transform);
+                //newTerrainObject.transform.SetParent(terrainsFolder.transform);
 
                 newTerrainObject.name = "" + (position.id + (isHighlighted ? 500 : 0));
                 newTerrainObject.tag = (isHighlighted ? "HighlightTerrain" : "Terrain");
@@ -108,6 +108,7 @@ public class GenerateTerrain : MonoBehaviour
             ), terrainObject.name, true, 500);
         }
     }
+
 }
 public class GridData
 {

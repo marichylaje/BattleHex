@@ -9,6 +9,7 @@ public class DetectClickEndButton : MonoBehaviour
     void Start() {
         // Busca el componente Button en la imagen de Canvas
         Button button = GetComponent<Button>();
+        //Debug.Log("BUTTON NAME: " + button.Image.name);
 
         // Agrega una función de escucha para el evento onClick
         button.onClick.AddListener(turnManager.EndTurn);

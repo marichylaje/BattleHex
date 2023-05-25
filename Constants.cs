@@ -3,6 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 
 //MAX TERRAIN ID: 179
+/*
+    DIRECTIONS:
+    - top right: 1
+    - top: 2
+    - top left: 3
+    - bot left: 4
+    - bot: 5
+    - bot right: 6
+*/
 public static class Constants
 {
     public static float movSpeed = .5f;
@@ -10,6 +19,8 @@ public static class Constants
     public static float enemyDesface = -2f;
     public static int initialTerrainID = 10;
     public static int initialEnemyTerrainID = 173;
+    public static float maxXsizeMap = 400; //realizar calc math= spriteTXSize * terrainHeight
+    public static float maxYsizeMap = 400;
     public static float hexWidth = 1;
     public static float hexHeight = 1;
     public static float gapX;
