@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,8 +20,11 @@ public class SpellCastManager : MonoBehaviour
     public GenerateTerrain generateTerrain;
 
     public MoveLogic moveLogic;
+    public SpellShapes spellShapes;
     public CreateHighlights createHighlights;
     public DetectClickSkills[] detectClickSkills;
+    public string spellNameClicked = null;
+
     public bool isCasting = false;
     public bool isThrowing = false;
     private Transform throwParentTransform;
@@ -40,33 +44,28 @@ public class SpellCastManager : MonoBehaviour
         playerSprite = player.GetComponent<SpriteRenderer>();
     }
 
-    /*private void Update(){
-        foreach(DetectClickSkills detectClickSkill in detectClickSkills){
-            if(detectClickSkill.spellNameClicked != null){
-                castingSpellName = detectClickSkill.spellNameClicked;
-                detectClickSkill.spellNameClicked = null;
-            }
-        }
-
-        if(castingSpellName != null){
-            if(castingSpellName == "fireball"){
-                Debug.Log("FIREBALL!!!");
-                ThrowSkill();
-            }
-            castingSpellName = null;
-        }
-    }*/
-
-    public void ThrowSkill(){
+    public void ThrowFireBall(){
         TerrainObjects terrainUnder = Helper.GetActualPlayerBlockFromTag("Player", false, Constants.terrainObjects);
+        ThrowSkill(() => {
+            generateTerrain.HighlighPlayableTerrain(Helper.GetStraightLine(3, DetectMouseSpace(), terrainUnder, Constants.terrainObjects));
+        });
+    }
+
+    public void ThrowFireWall(){
+        TerrainObjects terrainUnder = Helper.GetActualPlayerBlockFromTag("Player", false, Constants.terrainObjects);
+        ThrowSkill(() => {
+            generateTerrain.HighlighPlayableTerrain(Helper.GetStraightLine(3, DetectMouseSpace(), terrainUnder, Constants.terrainObjects));
+        });
+    }
+
+    public void ThrowSkill(Action actionHighlightAttack){
         moveLogic.DestroyHighlighPlayableTerrain(500, -1);
-        generateTerrain.HighlighPlayableTerrain(Helper.GetStraightLine(3, DetectMouseSpace(), terrainUnder, Constants.terrainObjects));
+        actionHighlightAttack();
         if (Input.GetMouseButtonDown(0))
         {
             ActivateParticleSystem();
             isCasting = false;
             isThrowing = true;
-            Debug.Log("2");
         }
         if (Input.GetKeyDown(KeyCode.Escape)){
             createHighlights.WalkHighlight(moveLogic.movementDistance, Constants.terrainObjects);
@@ -131,9 +130,6 @@ public class SpellCastManager : MonoBehaviour
                 newRotation = 306.5f;
                 break;
         }
-
-
-        Debug.Log("HERE NEW POSITION: " + newPosition.x + " - " + newPosition.y);
         staffEffectsTransform.transform.position = newPosition;
 
         return newRotation;

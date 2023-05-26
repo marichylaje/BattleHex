@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class DetectClickSkills : MonoBehaviour
 {
-    public string spellNameClicked = null;
+    public SpellCastManager spellCastManager;
     private void Start() {
         // Busca el componente Button en la imagen de Canvas
         Button button = GetComponent<Button>();
@@ -20,7 +20,8 @@ public class DetectClickSkills : MonoBehaviour
         Sprite image = GetComponent<Image>().sprite;
         if(image != null && image.name != "skill box"){
             Debug.Log("IMAGE: " + image.name);
-            spellNameClicked = image.name;
+            spellCastManager.isCasting = true;
+            spellCastManager.spellNameClicked = image.name;
         }
     }
 }

@@ -33,7 +33,7 @@ public class TurnManager : MonoBehaviour
 
         if (spellCastManager.isCasting)
         {
-            spellCastManager.ThrowSkill();
+            spellCastManager.ThrowFireBall();
         }
 
         if(isClickedHighlightedTerrain){
