@@ -9,19 +9,20 @@ public class CreateHighlights : MonoBehaviour
 
     public void WalkHighlight(int walkDistance, List<TerrainObjects> terrainObjects)
     {
-        TerrainObjects actualTerrainUnderPlayer = Helper.GetActualPlayerBlockFromTag("Player", false, terrainObjects);
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        TerrainObjects actualTerrainUnderPlayer = Helper.GetActualPlayerBlockFromGameObject(player, false, terrainObjects);
         List<TerrainObjects> terrainToHighlight = new List<TerrainObjects>();
         
         for(int i = 1; i <= walkDistance; i++){
             terrainToHighlight = Helper.GetSurroundingTerrainsByCoords(i, actualTerrainUnderPlayer, terrainObjects);
-            
+            terrainToHighlight.RemoveAll(terrain => Helper.GetEnemiesIDTerrains(terrainObjects).Contains(terrain.id));
             generateTerrain.HighlighPlayableTerrain(terrainToHighlight.ToArray());
         }
     }
 
     /*public void StarHighlightAttack(int attackDistance, int startDistance, List<TerrainObjects> terrainObjects)
     {
-        int actualTerrainIDUnderPlayer = Helper.GetActualPlayerBlockFromTag("Player", false, terrainObjects).id;
+        int actualTerrainIDUnderPlayer = Helper.GetActualPlayerBlockFromGameObject("Player", false, terrainObjects).id;
 
         TerrainObjects[] toHighlightTerrainTop = Helper.GetOnTopBotTerrains(actualTerrainIDUnderPlayer, attackDistance, startDistance, true, terrainObjects);
         TerrainObjects[] toHighlightTerrainBottom = Helper.GetOnTopBotTerrains(actualTerrainIDUnderPlayer, attackDistance, startDistance, false, terrainObjects);
@@ -50,7 +51,7 @@ public class CreateHighlights : MonoBehaviour
 //TODO: DEVELOP THIS ATTACKS below AND MORE
     public void SingleLineHighlightAttack(int attackDistance, int startDistance, List<TerrainObjects> terrainObjects)
     {
-        int actualTerrainIDUnderPlayer = Helper.GetActualPlayerBlockFromTag("Player", false, terrainObjects).id;
+        int actualTerrainIDUnderPlayer = Helper.GetActualPlayerBlockFromGameObject("Player", false, terrainObjects).id;
 
         TerrainObjects[] toHighlightTerrainTop = Helper.GetOnTopBotTerrains(actualTerrainIDUnderPlayer, attackDistance, startDistance, true, terrainObjects);
 
@@ -59,7 +60,7 @@ public class CreateHighlights : MonoBehaviour
 
     public void TripleLineHighlightAttack(int attackDistance, int startDistance, List<TerrainObjects> terrainObjects)
     {
-        int actualTerrainIDUnderPlayer = Helper.GetActualPlayerBlockFromTag("Player", false, terrainObjects).id;
+        int actualTerrainIDUnderPlayer = Helper.GetActualPlayerBlockFromGameObject("Player", false, terrainObjects).id;
 
         TerrainObjects[] toHighlightTerrainTop = Helper.GetOnTopBotTerrains(actualTerrainIDUnderPlayer, attackDistance, startDistance, true, terrainObjects);
 

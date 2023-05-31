@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerStats : MonoBehaviour
 {
-    public int life = 100;
+    public int life = 9;
     public int movement = 3;
 
     bool onFire = false;
@@ -21,17 +21,17 @@ public class PlayerStats : MonoBehaviour
         return currentLife - damage;
     }
 
-    void updateLifeUI(int life){
-        //GameObject.FindWithTag("lifeUI").GetComponent<Text>().value = life;
+    /*void updateLifeUI(int life){
+        GameObject.FindWithTag("LifePlayerUI").GetComponent<Text>().value = life;
 
-    }
+    }*/
 
 
     // Update is called once per frame
     /*public void UpdatePlayerStats()
     {
-        if(Helper.GetActualPlayerBlockFromTag("Player").terrainType.effect == "fire"){
-            life = getDamage(life, Helper.GetActualPlayerBlockFromTag("Player").terrainType.effectDmg);
+        if(Helper.GetActualPlayerBlockFromGameObject("Player").terrainType.effect == "fire"){
+            life = getDamage(life, Helper.GetActualPlayerBlockFromGameObject("Player").terrainType.effectDmg);
             updateLifeUI(life);
         }
     }*/

@@ -18,7 +18,7 @@ public static class Constants
     public static float playerDesface = 3f;
     public static float enemyDesface = -2f;
     public static int initialTerrainID = 10;
-    public static int initialEnemyTerrainID = 173;
+    public static int[] initialEnemyTerrainIDs = {203, 85, 149, 142};
     public static float maxXsizeMap = 400; //realizar calc math= spriteTXSize * terrainHeight
     public static float maxYsizeMap = 400;
     public static float hexWidth = 1;

@@ -20,21 +20,16 @@ public class TurnManager : MonoBehaviour
     {
         GameObject.FindWithTag("enemyTurnIcon").GetComponent<Image>().enabled = false;
         player1Turn = false;
-        Debug.Log("TurnMgr Empieza ejecutando primero automaticamente ENDTURN");
+
         Invoke("DelayedEndTurn", 0.5f);
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.W))
+        /*if (Input.GetKeyDown(KeyCode.W))
         {
             spellCastManager.isCasting = true;
-        }
-
-        if (spellCastManager.isCasting)
-        {
-            spellCastManager.ThrowFireBall();
-        }
+        }*/
 
         if(isClickedHighlightedTerrain){
             EndTurn();
@@ -62,7 +57,7 @@ public class TurnManager : MonoBehaviour
             // Es el turno del jugador 1
             //step0: update turn flag
             player1Turn = false;
-            Debug.Log("--------Dentro del IF player1Turn true--------");
+
             //moveLogic.DestroyHighlighPlayableTerrain(500, -1);
 
             //step1: change UI
@@ -91,14 +86,31 @@ public class TurnManager : MonoBehaviour
         {
             // Es el turno del jugador 2
             //step0: update turn flag
-            Debug.Log("--------Dentro del ELSE player1Turn false--------");
             player1Turn = true;
+            moveLogic.HideHighlighPlayableTerrain(500, -1);
+            float turnSpeed = 1f;
+            GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+
+            GameObject.FindWithTag("myTurnIcon").GetComponent<Image>().enabled = false;
+            GameObject.FindWithTag("enemyTurnIcon").GetComponent<Image>().enabled = true;
 
             //step2: destroy HighlightTerrain and update flag
             moveLogic.generateHighlightTerrain = false;
 
             //mover la camara al enemigo
-            GameObject enemy = GameObject.FindGameObjectWithTag("Enemy");
+            StartCoroutine(EnemyTurn(turnSpeed));
+
+            
+            spellCastManager.isThrowing = false;
+            isClickedHighlightedTerrain = false;
+            StartCoroutine(DelayedAction((turnSpeed * 1.45f) * enemies.Length, () => {EndTurn();}));
+        }
+    }
+
+    private IEnumerator EnemyTurn(float turnSpeed){
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        foreach (GameObject enemy in enemies)
+        {
             if (enemy != null)
             {
                 // Obtener la posición del enemigo
@@ -107,32 +119,24 @@ public class TurnManager : MonoBehaviour
                 // Calcular la posición a la cual la cámara debe desplazarse
                 Vector3 targetPosition = new Vector3(enemyPosition.x, enemyPosition.y, Camera.main.transform.position.z);
 
-                // Desplazar la cámara hacia la posición del enemigo
-                if(spellCastManager.isThrowing){
-                    StartCoroutine(DelayedAction(animSecondsLong, () => {
-                        StartCoroutine(MoveCamera(targetPosition));
-                        GameObject.FindWithTag("myTurnIcon").GetComponent<Image>().enabled = false;
-                        GameObject.FindWithTag("enemyTurnIcon").GetComponent<Image>().enabled = true;
-                    }));
-                } else {
-                    StartCoroutine(MoveCamera(targetPosition));
-                    GameObject.FindWithTag("myTurnIcon").GetComponent<Image>().enabled = false;
-                    GameObject.FindWithTag("enemyTurnIcon").GetComponent<Image>().enabled = true;
-                }
-            }            
-
-            //step3: enemy IA action
-            // TODO: cambiar esto por el mov de cada enemigo
-            if(spellCastManager.isThrowing){
-                StartCoroutine(DelayedAction(animSecondsLong, () => {
-                    StartCoroutine(DelayedEnemyAction(1f));
-                }));
-            } else {
-                StartCoroutine(DelayedEnemyAction(1f));
+                // Esperar hasta que la cámara termine de moverse antes de pasar al siguiente enemigo
+                yield return StartCoroutine(MoveCamera(targetPosition));
             }
-            spellCastManager.isThrowing = false;
-            isClickedHighlightedTerrain = false;
 
+            // Esperar un tiempo antes de que el siguiente enemigo realice su acción
+            //yield return new WaitForSeconds(turnSpeed);
+
+            // Realizar la acción del enemigo
+            EnemyAction(turnSpeed / 3, enemy);
+        }
+    }
+    private void EnemyAction(float turnSpeed, GameObject enemy){
+        if(spellCastManager.isThrowing){
+            StartCoroutine(DelayedAction(turnSpeed, () => {
+                StartCoroutine(DelayedEnemyAction(turnSpeed, enemy));
+            }));
+        } else {
+            StartCoroutine(DelayedEnemyAction(.1f, enemy));
         }
     }
 
@@ -141,30 +145,37 @@ public class TurnManager : MonoBehaviour
         yield return new WaitForSeconds(delay);
         function();
     }
-
-    private IEnumerator DelayedEnemyAction(float delay)
+//TODO agregar gameobject enemy para que afecte solo al enemigo enviado as params
+// podemos cambiar MovePlayerToPosition para en vez de tomar el tag, tome el gameobject
+    private IEnumerator DelayedEnemyAction(float delay, GameObject enemy)
     {
         moveLogic.HideHighlighPlayableTerrain(500, -1);
-        yield return new WaitForSeconds(delay);
+        // HERE yield return new WaitForSeconds(delay / 2);
 
         //step3: enemy IA action
         // TODO: cambiar esto por el mov de cada enemigo
         int enemyWalk = 2;
-        TerrainObjects[] pathToPlayer = Helper.GetShorterPathToPlayer("Enemy", enemyWalk, Constants.terrainObjects);
+        TerrainObjects[] pathToPlayer = Helper.GetShorterPathToPlayer(enemy, enemyWalk, Constants.terrainObjects);
         pathToPlayer = pathToPlayer.Where(path => path != null).ToArray();
 
+        // visible path to player
         //createHighlights.HighlightList(pathToPlayer);
+
+        //attacks from enemy
+        //EnemyAttack();
+
         if (pathToPlayer[enemyWalk-1] != null)
         {
-            StartCoroutine(Helper.MovePlayerToPosition(pathToPlayer[enemyWalk-1].xPos, pathToPlayer[enemyWalk-1].yPos, "Enemy", 1.0f));
+            StartCoroutine(Helper.MovePlayerToPosition(pathToPlayer[enemyWalk-1].xPos, pathToPlayer[enemyWalk-1].yPos, enemy, 1.0f));
+            
         }
         yield return new WaitForSeconds(delay / 2);
-        EndTurn();
+        //EndTurn();
     }
 
     private IEnumerator MoveCamera(Vector3 targetPosition)
     {
-        yield return new WaitForSeconds(.3f);
+        yield return new WaitForSeconds(.2f);
         // Obtener la posición actual de la cámara
         Vector3 startPosition = Camera.main.transform.position;
 
@@ -192,7 +203,7 @@ public class TurnManager : MonoBehaviour
         }
 
         // Esperar 1 segundo adicional
-        yield return new WaitForSeconds(1.0f);
+        yield return new WaitForSeconds(.20f);
 
         // Realizar el resto de las acciones del turno del jugador 2
         // ...

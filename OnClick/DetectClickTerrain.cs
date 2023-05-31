@@ -4,6 +4,7 @@ using UnityEngine;
 public class DetectClickTerrain : MonoBehaviour
 {
     public TurnManager turnManager;
+    public SpellCastManager spellCastManager;
 
     void OnMouseDown()
     {
@@ -16,11 +17,14 @@ public class DetectClickTerrain : MonoBehaviour
                 TerrainObjects terrainUnder = Helper.GetTerrainDataFromCoords(terrainObjectsComponent.xPos, terrainObjectsComponent.yPos, false, Constants.terrainObjects);
                 float xPos = terrainUnder.xPos;
                 float yPos = terrainUnder.yPos;
-                StartCoroutine(Helper.MovePlayerToPosition(xPos, yPos, "Player", Constants.movSpeed));
+                GameObject player = GameObject.FindGameObjectWithTag("Player");
 
-                //TODO: esto deberia estar en un doc especial que controle los turnos, y no ser llamado aca
-                Debug.Log("1");
+                StartCoroutine(Helper.MovePlayerToPosition(xPos, yPos, player, Constants.movSpeed));
+
                 turnManager.isClickedHighlightedTerrain = true;
+                if(spellCastManager.isCasting){
+                    spellCastManager.isChangingSpell = false;
+                }
             }
         }
     }

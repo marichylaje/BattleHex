@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -98,11 +99,10 @@ public static class Helper
     }
 
     
-    public static IEnumerator MovePlayerToPosition(float xPos, float yPos, string tag, float movementDuration)
+    public static IEnumerator MovePlayerToPosition(float xPos, float yPos, GameObject player, float movementDuration)
     {
-        GameObject player = GameObject.FindGameObjectWithTag(tag);
         Vector3 startPosition = player.transform.position;
-        Vector3 targetPosition = new Vector3(xPos, yPos + Helper.GetPlayerDesface(tag), 0);
+        Vector3 targetPosition = new Vector3(xPos, yPos + Helper.GetPlayerDesface(player.tag), 0);
 
         float elapsedTime = 0f;
 
@@ -145,6 +145,31 @@ public static class Helper
         }
     }
 
+    public static TerrainObjects GetTerrainUnderMouse(List<TerrainObjects> terrainObjects){
+        Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        float xPos = mousePosition.x / 15f; // Dividir por el ancho de cada hexágono
+        float yPos = mousePosition.y / 15f; // Dividir por la altura de cada hexágono
+        int roundedX = Mathf.RoundToInt(xPos);
+        int roundedY = Mathf.RoundToInt(yPos);
+        float worldX = roundedX * 15f; // Multiplicar por el ancho de cada hexágono
+        float worldY = roundedY * 15f; // Multiplicar por la altura de cada hexágono
+        TerrainObjects nearestObject = null;
+        float nearestDistance = Mathf.Infinity;
+
+        foreach (TerrainObjects obj in terrainObjects) // Reemplaza "yourObjectList" con la lista que contiene los GameObjects de la cuadrícula hexagonal
+        {
+            float distance = Vector2.Distance(new Vector2(worldX, worldY), obj.transform.position);
+
+            if (distance < nearestDistance)
+            {
+                nearestObject = obj;
+                nearestDistance = distance;
+            }
+        }
+
+        return nearestObject;
+    }
+
 
     /*public static void MovePlayerToIDTerrain(string tag, int id, bool enemy, List<TerrainObjects> terrainObjects){
         TerrainObjects terrain = terrainObjects[id];
@@ -152,17 +177,16 @@ public static class Helper
     }*/
 
     // funcion generalmente usada para detectar en que casilla se encuentra el jugador o enemigos, si le pasamos su tag
-    public static TerrainObjects GetActualPlayerBlockFromTag(string tagName, bool isEnemy, List<TerrainObjects> terrainObjects)
+    public static TerrainObjects GetActualPlayerBlockFromGameObject(GameObject character, bool isEnemy, List<TerrainObjects> terrainObjects)
     {
-        GameObject actualBlock = GameObject.FindGameObjectWithTag(tagName);
-        if (actualBlock == null)
+        if (character == null)
         {
-            Debug.LogError("Could not find game object with tag: " + tagName);
+            Debug.LogError("Could not find game object with tag: " + character.tag);
             return null;
         }
 
         float yDesface = isEnemy ? Constants.enemyDesface : Constants.playerDesface;
-        Vector2 actualPosition = new Vector2(actualBlock.transform.position.x, actualBlock.transform.position.y - yDesface);
+        Vector2 actualPosition = new Vector2(character.transform.position.x, character.transform.position.y - yDesface);
 
         foreach (TerrainObjects terrainObject in terrainObjects)
         {
@@ -172,7 +196,7 @@ public static class Helper
             }
         }
 
-        Debug.LogError("Could not find terrain object at position: " + actualPosition + "from tag: " + tagName);
+        Debug.LogError("Could not find terrain object at position: " + actualPosition + "from tag: " + character.tag);
         return null;
     }
 
@@ -237,12 +261,13 @@ public static class Helper
         return response.ToArray();
     }
 
-    public static List<Vector2> GetSurroundingCoords(int d, TerrainObjects terrainUnder, List<TerrainObjects> terrainObjects) {        
+    public static List<Vector2> GetSurroundingCoords(int distance, TerrainObjects terrainUnder, List<TerrainObjects> terrainObjects) {        
         float yMove = Constants.spriteTYSize;
         float xMove = Constants.spriteTXSize;
         float yOffset = Constants.spriteTYSizePenalization;
         float x = terrainUnder.xPos;
         float y = terrainUnder.yPos;
+        int d = distance;
         int id = terrainUnder.id;
         
         int countFlagOne = 0;
@@ -250,18 +275,15 @@ public static class Helper
         List<TerrainObjects> terrains = new List<TerrainObjects>();
         List<Vector2> coords = new List<Vector2>();
 
+        // agarra los ejes principales entre nosotros y Distance
         coords.Add(new Vector2(x, Mathf.Round((y + (d * yMove)) * 100f) / 100f)); // top
         coords.Add(new Vector2(x, Mathf.Round((y - (d * yMove)) * 100f) / 100f)); // bot
         coords.Add(new Vector2(x - (d * xMove), Mathf.Round((coords[0].y - ((d * yMove) / 2) + (id % 2 == 0 ? ((d % 2 == 0) ? 0 : yOffset) : ((d % 2 == 0) ? 0 : -yOffset))) * 100f) / 100f)); // topL
         coords.Add(new Vector2(x - (d * xMove), Mathf.Round((coords[1].y + ((d * yMove) / 2) + (id % 2 == 0 ? ((d % 2 == 0) ? 0 : yOffset) : ((d % 2 == 0) ? 0 : -yOffset))) * 100f) / 100f)); // botL
         coords.Add(new Vector2(x + (d * xMove), Mathf.Round((coords[0].y - ((d * yMove) / 2) + (id % 2 == 0 ? ((d % 2 == 0) ? 0 : yOffset) : ((d % 2 == 0) ? 0 : -yOffset))) * 100f) / 100f)); // topR
         coords.Add(new Vector2(x + (d * xMove), Mathf.Round((coords[1].y + ((d * yMove) / 2) + (id % 2 == 0 ? ((d % 2 == 0) ? 0 : yOffset) : ((d % 2 == 0) ? 0 : -yOffset))) * 100f) / 100f)); // botR
-        /*Debug.Log("coords top X:" + coords[0].x + ", Y: " + coords[0].y);
-        Debug.Log("coords bot :" + coords[1].x + ", Y: " + coords[1].y);
-        Debug.Log("coords topL :" + coords[2].x + ", Y: " + coords[2].y);
-        Debug.Log("coords botL :" + coords[3].x + ", Y: " + coords[3].y);
-        Debug.Log("coords topR :" + coords[4].x + ", Y: " + coords[4].y);
-        Debug.Log("coords botR :" + coords[5].x + ", Y: " + coords[5].y);*/
+
+        // llena los espacios en blanco entre cada eje principal, creando una linea
         if(d > 1){
             for(int i = 1; i < d; i++){
                 coords.Add(new Vector2((coords[0].x - (xMove * i)), Mathf.Round(((coords[0].y - ((yMove / 2) * i)) + (id % 2 == 0 ? ((i % 2 != 0) ? yOffset : 0) : ((i % 2 != 0) ? -yOffset : 0))) * 100f) / 100f)); // topL
@@ -303,7 +325,7 @@ public static class Helper
 
     /*public static List<TerrainObjects> GetSurroundingTerrainsByTag(string tagName, bool enemy, List<TerrainObjects> terrainObjects){
         List<TerrainObjects> surroundingTerrains = new List<TerrainObjects>();
-        TerrainObjects terrainUnderEnemy = Helper.GetActualPlayerBlockFromTag(tagName, enemy, terrainObjects);
+        TerrainObjects terrainUnderEnemy = Helper.GetActualPlayerBlockFromGameObject(tagName, enemy, terrainObjects);
         float xPos = terrainUnderEnemy.xPos;
         float yPos = terrainUnderEnemy.yPos;
 
@@ -315,15 +337,16 @@ public static class Helper
     }*/
 
 //TODO: cambiar enemyTag de String a ENUM
-    public static int GetMinDistanceTillEnemy(string enemyTag, int attackDistance, List<TerrainObjects> terrainObjects){
+    public static int GetMinDistanceTillEnemy(GameObject enemy, int attackDistance, List<TerrainObjects> terrainObjects){
         // 1- obtener datos del terreno del jugador
-        TerrainObjects playerTerrain = Helper.GetActualPlayerBlockFromTag("Player", false, terrainObjects);
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        TerrainObjects playerTerrain = Helper.GetActualPlayerBlockFromGameObject(player, false, terrainObjects);
         float playerTXPos = playerTerrain.xPos;
         float playerTYPos = playerTerrain.yPos;
         int ajuste = 0;
 
         // 2- obtener datos del terreno actual del enemigo
-        TerrainObjects enemyTerrain = Helper.GetActualPlayerBlockFromTag(enemyTag, true, terrainObjects);
+        TerrainObjects enemyTerrain = Helper.GetActualPlayerBlockFromGameObject(enemy, true, terrainObjects);
         float enemyTXPos = enemyTerrain.xPos;
         float enemyTYPos = enemyTerrain.yPos;
 
@@ -347,10 +370,22 @@ public static class Helper
         return minDistanceTillEnemy;
     }
 
+    public static int[] GetEnemiesIDTerrains(List<TerrainObjects> terrainObjects){
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        int[] enemyTerrain = new int[enemies.Length];
+        for (int i = 0; i < enemies.Length; i++)
+        {
+            GameObject innerEnemy = enemies[i];
+            enemyTerrain[i] = Helper.GetActualPlayerBlockFromGameObject(innerEnemy, true, terrainObjects).id;
+            Debug.Log("HERE TERRAIN ID ENEMY: " + enemyTerrain[i]);
+        }
+        return enemyTerrain;
+    }
+
 //TODO: despues ejecutar al reves, y hacer el camino mas corto
 //      priorizar cuando se avanza en diagonal que cuando se avanza en linea recta, cuando en diagonal ambos disminuyen
 //      eliminar la impresion de highlights para enemigo
-    public static TerrainObjects[] GetShorterPathToPlayer(string enemyTag, int attackDistance, List<TerrainObjects> terrainObjects){
+    public static TerrainObjects[] GetShorterPathToPlayer(GameObject enemy, int attackDistance, List<TerrainObjects> terrainObjects){
         /*
             1- obtener datos del jugador y enemigo a mover
             2- GetSurrounderTerrain del enemigo, d = 1
@@ -360,15 +395,27 @@ public static class Helper
             +
         */
         // 1- obtener datos del terreno del jugador
-        TerrainObjects playerTerrain = Helper.GetActualPlayerBlockFromTag("Player", false, terrainObjects);
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        TerrainObjects playerTerrain = Helper.GetActualPlayerBlockFromGameObject(player, false, terrainObjects);
         float playerTXPos = playerTerrain.xPos;
         float playerTYPos = playerTerrain.yPos;
         int ajuste = 0;
 
         // 2- obtener datos del terreno actual del enemigo
-        TerrainObjects enemyTerrain = Helper.GetActualPlayerBlockFromTag(enemyTag, true, terrainObjects);
+        TerrainObjects enemyTerrain = Helper.GetActualPlayerBlockFromGameObject(enemy, true, terrainObjects);
         float enemyTXPos = enemyTerrain.xPos;
         float enemyTYPos = enemyTerrain.yPos;
+
+        /*GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        int[] otherEnemyTerrain = new int[enemies.Length - 1];
+        for (int i = 0; i >= enemies.Length; i++)
+        {
+            GameObject innerEnemy = enemies[i];
+            if (innerEnemy != enemy){
+                otherEnemyTerrain[i] = Helper.GetActualPlayerBlockFromGameObject(innerEnemy, true, terrainObjects).id;
+                Debug.Log("HERE TERRAIN ID ENEMY: " + otherEnemyTerrain[i]);
+            }
+        }*/
 
         // 3- comparar a cuantos hexagonos se encuentra en eje X e Y
         float xDistanceBetween(TerrainObjects terrainObj){
@@ -427,7 +474,7 @@ public static class Helper
                     }
                 }
                 // Si el surrTerrain ya existe en acumTerrains, continuar con la siguiente iteración
-                if (alreadyExists)
+                if (alreadyExists || Helper.GetEnemiesIDTerrains(terrainObjects).Contains(surrTerrain.id))
                 {
                     continue;
                 }

@@ -12,7 +12,7 @@ using UnityEngine;
     - bot: 5
     - bot right: 6
 */
-public class SpellCastManager : MonoBehaviour
+public class SpellCastManager2 : MonoBehaviour
 {
     public List<ParticleSystem> casting;
     public List<ParticleSystem> skillThrow;
@@ -22,14 +22,15 @@ public class SpellCastManager : MonoBehaviour
     public MoveLogic moveLogic;
     public SpellShapes spellShapes;
     public CreateHighlights createHighlights;
-    public DetectClickSkills[] detectClickSkills;
     public string spellNameClicked = null;
 
     public bool isCasting = false;
+    public bool isChangingSpell = false;
     public bool isThrowing = false;
     private Transform throwParentTransform;
     private Transform staffEffectsTransform;
     private SpriteRenderer playerSprite;
+    private GameObject player;
 
 
     // Cuadrantes en grados
@@ -40,37 +41,65 @@ public class SpellCastManager : MonoBehaviour
         throwParentTransform = GameObject.Find("ThrowParent").transform;
         staffEffectsTransform = GameObject.Find("StaffEffects").transform;
 
-        GameObject player = GameObject.Find("Player");
+        player = GameObject.Find("Player");
         playerSprite = player.GetComponent<SpriteRenderer>();
     }
 
+    private void Update()
+    {
+        if (isCasting)
+        {
+            if(spellNameClicked == "fireball"){
+                ThrowFireBall();
+            }
+            if(spellNameClicked == "fire"){
+                ThrowFireWall();
+            }
+            if(spellNameClicked == "watergun"){
+                ThrowWaterGun();
+            }
+        }
+    }
+
     public void ThrowFireBall(){
-        TerrainObjects terrainUnder = Helper.GetActualPlayerBlockFromTag("Player", false, Constants.terrainObjects);
-        ThrowSkill(() => {
-            generateTerrain.HighlighPlayableTerrain(Helper.GetStraightLine(3, DetectMouseSpace(), terrainUnder, Constants.terrainObjects));
+        TerrainObjects terrainUnder = Helper.GetActualPlayerBlockFromGameObject(player, false, Constants.terrainObjects);
+        CastSkill(() => {
+            generateTerrain.HighlighPlayableTerrain(spellShapes.GetStraightLine(3, DetectMouseSpace(), terrainUnder, Constants.terrainObjects));
         });
     }
 
     public void ThrowFireWall(){
-        TerrainObjects terrainUnder = Helper.GetActualPlayerBlockFromTag("Player", false, Constants.terrainObjects);
-        ThrowSkill(() => {
-            generateTerrain.HighlighPlayableTerrain(Helper.GetStraightLine(3, DetectMouseSpace(), terrainUnder, Constants.terrainObjects));
+        TerrainObjects terrainUnder = Helper.GetActualPlayerBlockFromGameObject(player, false, Constants.terrainObjects);
+        CastSkill(() => {
+            generateTerrain.HighlighPlayableTerrain(spellShapes.GetWallLine(DetectMouseSpace(), terrainUnder, Constants.terrainObjects));
         });
     }
 
-    public void ThrowSkill(Action actionHighlightAttack){
+// detectar el terreno debajo del click, y mandarlo como "terrainUnder"
+    public void ThrowWaterGun(){
+        TerrainObjects terrainUnder = Helper.GetActualPlayerBlockFromGameObject(player, false, Constants.terrainObjects);
+        CastSkill(() => {
+            generateTerrain.HighlighPlayableTerrain(spellShapes.GetMouseCircle(false, 1, Helper.GetTerrainUnderMouse(Constants.terrainObjects), Constants.terrainObjects));
+        });
+    }
+    public void CastSkill(Action actionHighlightAttack){
         moveLogic.DestroyHighlighPlayableTerrain(500, -1);
         actionHighlightAttack();
-        if (Input.GetMouseButtonDown(0))
-        {
-            ActivateParticleSystem();
-            isCasting = false;
-            isThrowing = true;
-        }
+        Debug.Log("1");
         if (Input.GetKeyDown(KeyCode.Escape)){
             createHighlights.WalkHighlight(moveLogic.movementDistance, Constants.terrainObjects);
             isCasting = false;
         }
+        if(isChangingSpell){
+            return;
+        }
+        ThrowSkill();
+    }
+    public void ThrowSkill(){
+        Debug.Log("2");
+        ActivateParticleSystem();
+        isCasting = false;
+        isThrowing = true;
     }
 
     private void ActivateParticleSystem()

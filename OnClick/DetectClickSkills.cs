@@ -16,11 +16,13 @@ public class DetectClickSkills : MonoBehaviour
     }
 
     private void onClickBtn() {
+        Debug.Log("3");
         // obtain the name of the ImageRender asociated with the button
         Sprite image = GetComponent<Image>().sprite;
         if(image != null && image.name != "skill box"){
             Debug.Log("IMAGE: " + image.name);
             spellCastManager.isCasting = true;
+            spellCastManager.isChangingSpell = true;
             spellCastManager.spellNameClicked = image.name;
         }
     }

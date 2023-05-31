@@ -57,10 +57,17 @@ public class MoveLogic : MonoBehaviour
 
     void InitPositions(){
         float initMovSpeed = 0.1f;
+
         TerrainObjects initTerrain = terrainObjects[Constants.initialTerrainID];
-        TerrainObjects initEnemyTerrain = terrainObjects[Constants.initialEnemyTerrainID];
-        StartCoroutine(Helper.MovePlayerToPosition(initTerrain.xPos, initTerrain.yPos, "Player", initMovSpeed));
-        StartCoroutine(Helper.MovePlayerToPosition(initEnemyTerrain.xPos, initEnemyTerrain.yPos, "Enemy", initMovSpeed));
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        StartCoroutine(Helper.MovePlayerToPosition(initTerrain.xPos, initTerrain.yPos, player, initMovSpeed));
+
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        for(int i = 0; i < Constants.initialEnemyTerrainIDs.Length; i++){
+            int enemyTerrainID = Constants.initialEnemyTerrainIDs[i];
+            TerrainObjects initEnemyTerrain = terrainObjects[enemyTerrainID];
+            StartCoroutine(Helper.MovePlayerToPosition(initEnemyTerrain.xPos, initEnemyTerrain.yPos, enemies[i], initMovSpeed));
+        }
     }
 
     public void HideHighlighPlayableTerrain(int idMax, int idMin)

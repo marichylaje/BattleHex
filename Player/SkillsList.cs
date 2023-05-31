@@ -11,8 +11,13 @@ public class SkillsList : MonoBehaviour
 
 public enum Effects
 {
-    Fire,
-    Cold
+    Burning,
+    Wet,
+    Freezed,
+    Movable,
+    Static,
+    Stun
+
 }
 
 public enum ElementTypes
@@ -20,16 +25,23 @@ public enum ElementTypes
     Fire,
     Water,
     Earth,
-    Wind,
-    Poison
+    Wind
 }
 public enum ThrowTypes
 {
-    selectedCircle,
-    singleLine,
-    tripleLine,
-    selfCircle,
-    tentacle,
+    singleLineOnHit,
+    singleLineExplodesEnd,
+    singleLineExplodesOnHit,
+    singleLineAllAlong,
+    multipleLineOnHit,
+    allLinesAllAlong,
+    radialAttackAroundCaster,
+    radialAttackFreePosition,
+    radialAttackLimitedPositionFromCaster,
+    halfRadialAttackAroundCaster,
+    singleObjectAttackFromRadiusCaster,
+    movesCaster
+
 }
 
 [System.Serializable]
